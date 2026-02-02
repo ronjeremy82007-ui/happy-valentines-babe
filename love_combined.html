@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Valentine's Day — Love Letter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap"
+      rel="stylesheet" />
+
+    <style>
+      /* ---------- Global / Home page styles (from original `love.html`) ---------- */
+      :root { --accent: rgb(165, 0, 0); }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: pink; /* initial home background */
+        overflow: hidden;
+        transition: background 400ms ease;
+      }
+
+      .background-heart {
+        position: fixed;
+        font-size: 500px;
+        top: -15%;
+        left: 27%;
+        opacity: 0.3;
+        z-index: -1;
+      }
+
+      .floating-heart {
+        position: fixed;
+        color: red;
+        font-size: 30px;
+        animation: rise 4s infinite;
+        z-index: -1;
+      }
+
+      @keyframes rise {
+        0% { bottom: -50px; opacity: 1; }
+        100% { bottom: 100vh; opacity: 0; }
+      }
+
+      p.title {
+        text-align: center;
+        margin-top: 100px;
+        font-size: 70px;
+        font-family: cursive;
+        font-feature-settings: "aalt";
+      }
+
+      .btnn { display: flex; justify-content: center; align-items: center; gap: 0.75rem; padding: 1rem; }
+
+      .yes-button, .no-button {
+        background-color: var(--accent);
+        border: none;
+        border-radius: 16px;
+        padding: 10px 30px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-size: x-large;
+      }
+      .yes-button:hover, .no-button:hover { background-color: rgb(255,0,0); box-shadow: 0px 4px 4px rgba(0,0,0,0.15); }
+      .yes-button:active, .no-button:active { background-color: rgb(139,0,0); }
+
+      /* Overlay + hearts used during transition */
+      .heart-overlay {
+        position: fixed; inset: 0; z-index: 10000; pointer-events: none; overflow: hidden; background: transparent; display: block; opacity: 1; transition: opacity 400ms ease;
+      }
+      .heart-overlay.full { background: rgba(255,255,255,1); transition: background 300ms ease, opacity 400ms ease; }
+      .heart-overlay .fill-heart { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.2); opacity: 0; font-size: 28px; will-change: transform, opacity; animation-name: heartPop; animation-fill-mode: forwards; }
+      @keyframes heartPop { 0% { opacity:0; transform: translate(-50%, -50%) scale(0.2); } 60% { opacity:1; transform: translate(-50%, -50%) scale(1); } 100% { opacity:1; transform: translate(-50%,-50%) scale(12); } }
+
+      .inpage-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 9999; opacity: 0; transition: opacity 500ms ease; pointer-events: auto; background: white; }
+
+      .music-toggle { position: fixed; right: 16px; top: 16px; z-index: 10001; background: rgba(0,0,0,0.5); color: #fff; border-radius: 20px; padding: 6px 10px; font-size: 14px; cursor: pointer; pointer-events: auto; display: inline-flex; gap: 8px; align-items: center; }
+      .music-toggle button { background: transparent; border: none; color: #fff; font-size: 14px; cursor: pointer; padding: 0; }
+
+      /* GIF styles (for NO button floaters) */
+      .floating-gif {
+        position: fixed;
+        z-index: 10002;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        transition: transform 3s ease, opacity 3s ease;
+        opacity: 1;
+        will-change: transform, opacity;
+      }
+
+      @keyframes gifFloat {
+        0% { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; }
+        100% { transform: translate(-50%, -50%) translateY(-120px) scale(0.9); opacity: 0; }
+      }
+
+      /* ---------- Embedded letter / envelope styles (from `love letter 2.html`) ---------- */
+      /* container hidden initially */
+      #letter-page { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 10002; pointer-events: none; opacity: 0; transition: opacity 400ms ease; }
+      #letter-page.show { opacity: 1; pointer-events: auto; }
+
+      #envelope {
+        position: relative; width: 280px; height: 180px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; background-color: #d9534f; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      }
+
+      .front { position: absolute; width: 0; height: 0; z-index: 3; }
+      .flap { border-left: 140px solid transparent; border-right: 140px solid transparent; border-bottom: 82px solid transparent; border-top: 98px solid #d9534f; transform-origin: top; pointer-events: none; }
+      .pocket { border-left: 140px solid #f5a3a2; border-right: 140px solid #f5a3a2; border-bottom: 90px solid #ff6f61; border-top: 90px solid transparent; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
+
+      .letter { position: relative; background-color: #fff; width: 90%; margin-left: auto; margin-right: auto; height: 90%; top: 5%; border-radius: 6px; box-shadow: 0 2px 26px rgba(0,0,0,0.12); font-family: "Dancing Script", cursive; }
+
+      .words { position: absolute; left: 10%; width: 80%; height: 14%; background-color: #ffe6e6; }
+      .words.line1 { top: 10%; font-size: 0.7rem; width: 20%; height: 7%; }
+      .words.line2 { top: 30%; text-align: center; font-size: 1.1rem; }
+      .words.line3 { top: 50%; font-size: 1.1rem; text-align: center; }
+      .words.line4 { top: 70%; font-size: 1.1rem; text-align: center; }
+
+      .open .flap { transform: rotateX(180deg); transition: transform 0.4s ease, z-index 0.6s; z-index: 1; }
+      .close .flap { transform: rotateX(0deg); transition: transform 0.4s 0.6s ease, z-index 1s; z-index: 5; }
+
+      .close .letter { transform: translateY(0px); transition: transform 0.4s ease, z-index 1s; z-index: 1; }
+      .open .letter { transform: translateY(-100px); transition: transform 0.4s 0.6s ease, z-index: 0.6s; z-index: 2; }
+
+      .hearts { position: absolute; top: 90px; left: 0; right: 0; z-index: 2; }
+      .heart { position: absolute; bottom: 0; right: 10%; pointer-events: none; }
+      .heart:before, .heart:after { position: absolute; content: ""; left: 50px; top: 0; width: 50px; height: 80px; background: #e60073; border-radius: 50px 50px 0 0; transform: rotate(-45deg); transform-origin: 0 100%; pointer-events: none; }
+      .heart:after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+      .close .heart { opacity: 0; animation: none; }
+
+      .a1 { left: 20%; transform: scale(0.6); opacity: 1; animation: slideUp 4s linear 1, sideSway 2s ease-in-out 4 alternate; animation-fill-mode: forwards; animation-delay: 0.7s; }
+      .a2 { left: 55%; transform: scale(1); opacity: 1; animation: slideUp 5s linear 1, sideSway 4s ease-in-out 2 alternate; animation-fill-mode: forwards; animation-delay: 0.7s; }
+      .a3 { left: 10%; transform: scale(0.8); opacity: 1; animation: slideUp 7s linear 1, sideSway 2s ease-in-out 6 alternate; animation-fill-mode: forwards; animation-delay: 0.7s; }
+
+      @keyframes slideUp { 0% { top: 0; } 100% { top: -600px; } }
+      @keyframes sideSway { 0% { margin-left: 0px; } 100% { margin-left: 50px; } }
+
+      /* when letter is shown, update body background for a dreamy look */
+      body.show-letter { background-color: #d3a5ee; }
+
+      .envlope-wrapper { height: 380px; }
+      .reset { text-align: center; margin-top: 1rem; }
+      .reset button { font-weight: 800; transition: all 0.1s linear; -webkit-appearance: none; background-color: transparent; border: solid 2px #d9534f; border-radius: 4px; color: #d9534f; display: inline-block; font-size: 14px; text-transform: uppercase; margin: 5px; padding: 10px; line-height: 1em; text-decoration: none; min-width: 120px; cursor: pointer; }
+      .reset button:hover { background-color: #d9534f; color: #fff; }
+
+      /* Small helper to center content on page */
+      .home { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:100vh; }
+
+      /* small close button to hide letter page */
+      .close-letter { position: fixed; right: 18px; top: 18px; z-index: 10003; background: rgba(0,0,0,0.6); color:#fff; padding:8px 12px; border-radius:8px; cursor:pointer; display:none; }
+      #letter-page.show ~ .close-letter { display:block; }
+
+      /* responsiveness tweaks */
+      @media (max-width: 480px) { .letter { width: 95%; } p.title { font-size: 40px; margin-top: 60px; } }
+    </style>
+  </head>
+  <body>
+    <main class="home">
+      <div class="background-heart">❤️</div>
+
+      <p class="title">Will you be my valentine??</p>
+
+      <div class="btnn">
+        <button class="yes-button">YES</button>
+        <button class="no-button">NO</button>
+      </div>
+
+    </main>
+
+    <!-- Overlay and small UI created dynamically by script -->
+
+    <!-- Embedded letter page (initially hidden) -->
+    <div id="letter-page" aria-hidden="true">
+      <div class="envlope-wrapper">
+        <div id="envelope" class="close">
+          <div class="front flap"></div>
+          <div class="front pocket"></div>
+          <div class="letter">
+            <div class="words line1">To: babe</div>
+            <div class="words line2">Dear babe, you are so beautiful</div>
+            <div class="words line3">That every time i see you</div>
+            <div class="words line4">my world stops</div>
+          </div>
+          <div class="hearts">
+            <div class="heart a1"></div>
+            <div class="heart a2"></div>
+            <div class="heart a3"></div>
+          </div>
+        </div>
+      </div>
+      <div class="reset">
+        <button id="open">Open</button>
+        <button id="reset">Close</button>
+      </div>
+    </div>
+
+    <div class="close-letter" id="close-letter" title="Close">✕</div>
+
+    <!-- Audio (created dynamically if not present) -->
+
+    <script>
+      // Floating hearts in background (home page)
+      setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart';
+        heart.textContent = '❤️';
+        heart.style.left = Math.random() * 100 + '%';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 4000);
+      }, 300);
+
+      // Play hearts then show embedded letter page (replaces iframe behavior)
+      document.querySelector('.yes-button').addEventListener('click', () => {
+        playHeartsThenShowLetter();
+      });
+
+      function playHeartsThenShowLetter() {
+        const overlay = document.createElement('div'); overlay.className = 'heart-overlay'; document.body.appendChild(overlay);
+
+        let audio = document.getElementById('bg-music');
+        if (!audio) {
+          audio = document.createElement('audio'); audio.id = 'bg-music'; audio.loop = true; audio.preload = 'auto'; audio.style.display = 'none';
+          const source = document.createElement('source'); source.src = 'music.mp3'; source.type = 'audio/mpeg'; audio.appendChild(source); document.body.appendChild(audio);
+        }
+        audio.volume = 0.6; const playPromise = audio.play(); if (playPromise && playPromise.catch) playPromise.catch(() => {});
+
+        let toggle = document.querySelector('.music-toggle');
+        if (!toggle) {
+          toggle = document.createElement('div'); toggle.className = 'music-toggle'; toggle.innerHTML = `<span class="label">Music</span><button class="mute-btn">🔊</button>`; document.body.appendChild(toggle);
+          const btn = toggle.querySelector('.mute-btn'); btn.addEventListener('click', () => { if (audio.muted) { audio.muted = false; btn.textContent = '🔊'; } else { audio.muted = true; btn.textContent = '🔈'; } });
+        }
+
+        const count = 40;
+        for (let i = 0; i < count; i++) {
+          const h = document.createElement('div'); h.className = 'fill-heart'; h.textContent = '❤️';
+          h.style.left = (Math.random() * 100) + '%'; h.style.top = (Math.random() * 100) + '%';
+          const delay = (Math.random() * 0.6).toFixed(3); const dur = (0.9 + Math.random() * 0.6).toFixed(3);
+          h.style.animationDelay = delay + 's'; h.style.animationDuration = dur + 's'; overlay.appendChild(h);
+        }
+
+        requestAnimationFrame(() => overlay.classList.add('active'));
+
+        const waitBeforeFull = 900;
+        const showAt = 1100;
+        const fadeDuration = 500;
+
+        setTimeout(() => overlay.classList.add('full'), waitBeforeFull);
+
+        setTimeout(() => {
+          // create full-screen iframe to show the standalone love letter page
+          const iframe = document.createElement('iframe');
+          iframe.className = 'inpage-frame';
+          iframe.src = 'love%20letter%202.html';
+          iframe.title = 'Love Letter';
+          iframe.allow = 'autoplay; fullscreen';
+          document.body.appendChild(iframe);
+
+          // reveal iframe and fade overlay
+          requestAnimationFrame(() => {
+            iframe.style.opacity = '1';
+            overlay.style.opacity = '0';
+          });
+
+          // remove overlay after fade completes
+          setTimeout(() => { try { overlay.remove(); } catch (e) {} }, fadeDuration + 100);
+
+          // show close control so user can dismiss the iframe
+          document.getElementById('close-letter').style.display = 'block';
+        }, showAt);
+      }
+
+      // Show playful GIFs on NO
+      document.querySelector('.no-button').addEventListener('click', () => {
+        const gifName = 'giphy.gif';
+        const count = 5;
+        for (let i = 0; i < count; i++) {
+          const img = document.createElement('img'); img.src = gifName; img.className = 'floating-gif'; img.style.left = Math.random() * 90 + '%'; img.style.top = (40 + Math.random()*40) + '%'; img.style.width = (60 + Math.random()*140) + 'px'; img.style.transform += ' rotate(' + (Math.random()*360) + 'deg)'; img.style.animation = 'gifFloat 4s forwards'; document.body.appendChild(img); setTimeout(() => img.remove(), 4200 + Math.random()*2000);
+        }
+      });
+
+      // Simple envelope open/close (vanilla JS, adapted from original jQuery)
+      document.addEventListener('click', function (ev) {
+        const target = ev.target;
+        if (target.matches('#open')) openEnvelope();
+        if (target.matches('#reset')) closeEnvelope();
+        if (target.matches('#envelope')) openEnvelope();
+      }, false);
+
+      function openEnvelope() {
+        const envelope = document.getElementById('envelope'); if (!envelope) return; envelope.classList.add('open'); envelope.classList.remove('close');
+      }
+      function closeEnvelope() {
+        const envelope = document.getElementById('envelope'); if (!envelope) return; envelope.classList.add('close'); envelope.classList.remove('open');
+      }
+
+      // close letter page helper
+      document.getElementById('close-letter').addEventListener('click', () => {
+        // hide embedded letter if present
+        document.getElementById('letter-page').classList.remove('show');
+        document.body.classList.remove('show-letter');
+
+        // remove iframe if present
+        const iframe = document.querySelector('.inpage-frame');
+        if (iframe) {
+          iframe.style.opacity = '0';
+          setTimeout(() => { try { iframe.remove(); } catch (e) {} }, 300);
+        }
+
+        // hide close control
+        document.getElementById('close-letter').style.display = 'none';
+
+        // pause music if present
+        const audio = document.getElementById('bg-music'); if (audio && !audio.paused) { audio.pause(); }
+      });
+    </script>
+
+  </body>
+</html>
